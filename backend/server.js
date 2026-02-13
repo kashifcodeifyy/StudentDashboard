@@ -5,17 +5,22 @@ require("dotenv").config();
 
 const app = express();
 
-// Database Connect karein
 connectDB();
 
-// Middleware
-app.use(cors());
-app.use(express.json()); // Body parser
+const corsOptions = {
+  origin: "http://localhost:5173",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true,
+  optionsSuccessStatus: 200,
+};
 
-// Test Route
+app.use(cors(corsOptions));
+
+app.use(express.json());
+
 app.get("/", (req, res) => res.send("DevDash API is Running..."));
 app.use("/api/students", require("./routes/students"));
-app.use("/api/students", require("./routes/leadRoutes"));
+app.use("/api/leads", require("./routes/leadRoutes"));
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5002;
 app.listen(PORT, () => console.log(`🚀 Server started on port ${PORT}`));
