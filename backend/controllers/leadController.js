@@ -1,7 +1,6 @@
 const Lead = require("../models/Lead");
 
 exports.getLeads = async (req, res) => {
-  console.log("Incoming Request: Fetching Students...");
   try {
     const leads = await Lead.find();
     return res.status(200).json(leads);
