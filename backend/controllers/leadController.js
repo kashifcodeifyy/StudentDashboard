@@ -1,6 +1,6 @@
 const Lead = require("../models/Lead");
 
-exports.getLeads = async (req, res) => {
+const getLeads = async (req, res) => {
   try {
     const leads = await Lead.find();
     return res.status(200).json(leads);
@@ -9,7 +9,7 @@ exports.getLeads = async (req, res) => {
   }
 };
 
-exports.addLead = async (req, res) => {
+const addLead = async (req, res) => {
   try {
     const newLead = new Lead(req.body);
     const savedLead = await newLead.save();
@@ -19,7 +19,7 @@ exports.addLead = async (req, res) => {
   }
 };
 
-exports.updateLead = async (req, res) => {
+const updateLead = async (req, res) => {
   try {
     const updatedLead = await Lead.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -30,11 +30,18 @@ exports.updateLead = async (req, res) => {
   }
 };
 
-exports.deleteLead = async (req, res) => {
+const deleteLead = async (req, res) => {
   try {
     await Lead.findByIdAndDelete(req.params.id);
     return res.status(200).json({ id: req.params.id });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
+};
+
+module.exports = {
+  getLeads,
+  addLead,
+  updateLead,
+  deleteLead,
 };

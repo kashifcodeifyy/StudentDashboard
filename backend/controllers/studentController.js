@@ -1,6 +1,6 @@
 const Student = require("../models/Student");
 
-exports.getStudents = async (req, res) => {
+const getStudents = async (req, res) => {
   try {
     const students = await Student.find();
     return res.status(200).json(students);
@@ -9,7 +9,7 @@ exports.getStudents = async (req, res) => {
   }
 };
 
-exports.addStudent = async (req, res) => {
+const addStudent = async (req, res) => {
   const { name, email, course } = req.body;
 
   if (!name || !email || !course) {
@@ -25,7 +25,7 @@ exports.addStudent = async (req, res) => {
   }
 };
 
-exports.updateStudent = async (req, res) => {
+const updateStudent = async (req, res) => {
   try {
     const student = await Student.findByIdAndUpdate(
       req.params.id,
@@ -39,7 +39,7 @@ exports.updateStudent = async (req, res) => {
   }
 };
 
-exports.deleteStudent = async (req, res) => {
+const deleteStudent = async (req, res) => {
   try {
     const student = await Student.findByIdAndDelete(req.params.id);
     if (!student) return res.status(404).json({ error: " not found" });
@@ -47,4 +47,11 @@ exports.deleteStudent = async (req, res) => {
   } catch (err) {
     return res.status(500).json({ error: " failed" });
   }
+};
+
+module.exports = {
+  getStudents,
+  addStudent,
+  updateStudent,
+  deleteStudent,
 };
