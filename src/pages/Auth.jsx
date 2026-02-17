@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { signup, login } from "../store/dataSlice";
+import { signupAsync, loginAsync } from "../store/dataSlice";
 import { useNavigate } from "react-router-dom";
 import {
   Mail,
@@ -15,29 +15,35 @@ import toast from "react-hot-toast";
 const AuthPage = ({ isSignup }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const users = useSelector((state) => state.data.users);
 
-  const handleSubmit = (e) => {
+  const { loading } = useSelector((state) => state.data);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isSignup) {
-      const userExists = users.find((e) => e.email === email);
-      if (userExists) return toast.error("User already exists!");
 
-      dispatch(signup({ email, password }));
-      toast.success("Account created! Please login.");
-      navigate("/signin");
-    } else {
-      const user = users.find(
-        (u) => u.email === email && u.password === password
+    if (isSignup) {
+      const resultAction = await dispatch(
+        signupAsync({ name, email, password })
       );
-      if (user) {
-        dispatch(login(user));
+
+      if (signupAsync.fulfilled.match(resultAction)) {
+        toast.success("Account created! Please login.");
+        navigate("/signin");
+      } else {
+        toast.error(resultAction.payload || "Signup failed!");
+      }
+    } else {
+      const resultAction = await dispatch(loginAsync({ email, password }));
+
+      if (loginAsync.fulfilled.match(resultAction)) {
         toast.success("Welcome back!");
         navigate("/dashboard");
       } else {
-        toast.error("Something went wriong!");
+        toast.error(resultAction.payload || "Invalid Credentials");
       }
     }
   };
@@ -56,9 +62,7 @@ const AuthPage = ({ isSignup }) => {
             DevDash
           </h1>
           <p className="text-slate-500 mt-2 font-medium">
-            {isSignup
-              ? "Start your journey with us"
-              : "Manage your business with ease"}
+            {isSignup ? "Sign Up" : "Login"}
           </p>
         </div>
 
@@ -73,6 +77,27 @@ const AuthPage = ({ isSignup }) => {
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {isSignup && (
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">
+                  Full Name
+                </label>
+                <div className="relative group">
+                  <UserPlus
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors"
+                    size={20}
+                  />
+                  <input
+                    type="text"
+                    required
+                    placeholder="Name"
+                    className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium text-slate-700"
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="space-y-1">
               <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">
                 Email Address
@@ -85,7 +110,7 @@ const AuthPage = ({ isSignup }) => {
                 <input
                   type="email"
                   required
-                  placeholder="name@company.com"
+                  placeholder="email"
                   className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium text-slate-700"
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -104,7 +129,7 @@ const AuthPage = ({ isSignup }) => {
                 <input
                   type="password"
                   required
-                  placeholder="••••••••"
+                  placeholder="password"
                   className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium text-slate-700"
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -113,10 +138,15 @@ const AuthPage = ({ isSignup }) => {
 
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 hover:shadow-blue-300 transform transition hover:-translate-y-0.5 active:scale-[0.98] flex items-center justify-center gap-2"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 hover:shadow-blue-300 transform transition hover:-translate-y-0.5 active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-70"
             >
-              {isSignup ? "Get Started" : "Sign In Now"}
-              <ArrowRight size={18} />
+              {loading
+                ? "Processing..."
+                : isSignup
+                ? "Get Started"
+                : "Sign In Now"}
+              {!loading && <ArrowRight size={18} />}
             </button>
           </form>
 

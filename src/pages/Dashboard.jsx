@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchStudents, fetchLeads } from "../store/dataSlice";
 import {
   BarChart,
   Bar,
@@ -20,49 +21,76 @@ import {
 } from "lucide-react";
 
 const Dashboard = () => {
-  const { users, leads, students } = useSelector((state) => state.data);
+  const dispatch = useDispatch();
+
+  const {
+    users = [],
+    leads = [],
+    students = [],
+    loading,
+    auth,
+  } = useSelector((state) => state.data || {});
 
   const [filterType, setFilterType] = useState("All");
 
+  useEffect(() => {
+    if (auth) {
+      dispatch(fetchStudents());
+      dispatch(fetchLeads());
+    }
+  }, [dispatch, auth]);
+
   const filteredLeads =
-    filterType === "All Leads"
-      ? leads.filter((l) => l.status === "Leads")
-      : leads;
+    filterType === "Leads"
+      ? (leads || []).filter((l) => l.status === "Leads")
+      : leads || [];
 
   const filteredStudents =
     filterType === "Active"
-      ? students.filter((s) => s.course !== "")
-      : students;
+      ? (students || []).filter((s) => s.course !== "")
+      : students || [];
 
   const barData = [
-    { name: "Users", count: users.length, color: "#6366f1" },
-    { name: "Leads", count: filteredLeads.length, color: "#10b981" },
-    { name: "Students", count: filteredStudents.length, color: "#8b5cf6" },
+    { name: "Users", count: (users || []).length, color: "#6366f1" },
+    { name: "Leads", count: (filteredLeads || []).length, color: "#10b981" },
+    {
+      name: "Students",
+      count: (filteredStudents || []).length,
+      color: "#8b5cf6",
+    },
   ];
 
   const stats = [
     {
       label: "Total Users",
-      count: users.length,
+      count: (users || []).length,
       icon: <Users className="w-6 h-6" />,
       gradient: "from-blue-600 to-indigo-600",
       shadow: "shadow-blue-200",
     },
     {
-      label: filterType === "All" ? "Leads" : "Students",
-      count: filteredLeads.length,
+      label: filterType === "All" ? "Leads" : filterType,
+      count: (filteredLeads || []).length,
       icon: <Target className="w-6 h-6" />,
       gradient: "from-emerald-500 to-teal-600",
       shadow: "shadow-emerald-200",
     },
     {
       label: "Active Students",
-      count: filteredStudents.length,
+      count: (filteredStudents || []).length,
       icon: <GraduationCap className="w-6 h-6" />,
       gradient: "from-purple-500 to-violet-600",
       shadow: "shadow-purple-200",
     },
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-10 bg-slate-50 min-h-screen font-sans">
@@ -108,7 +136,7 @@ const Dashboard = () => {
                     {stat.count}
                   </h3>
                   <div className="flex items-center gap-1 text-emerald-500 text-xs font-bold mt-2">
-                    <TrendingUp size={14} /> Update
+                    <TrendingUp size={14} /> Live
                   </div>
                 </div>
                 <div
@@ -126,10 +154,10 @@ const Dashboard = () => {
           <div className="lg:col-span-8 bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-xl font-bold text-slate-800 tracking-tight">
-                {filterType} Students
+                Statistics Overview
               </h2>
               <div className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-bold uppercase tracking-tighter">
-                Graphs
+                Visual Data
               </div>
             </div>
 
@@ -178,14 +206,18 @@ const Dashboard = () => {
           <div className="lg:col-span-4 space-y-8">
             <div className="bg-slate-900 p-8 rounded-3xl text-white shadow-2xl relative overflow-hidden group">
               <div className="relative z-10">
-                <h3 className="text-xl font-bold mb-2">Filter :</h3>
-                <p className="text-indigo-400 font-bold mb-4">{filterType}</p>
-                <p className="text-slate-400 text-sm mb-6">Viewing</p>
+                {/* <h3 className="text-xl font-bold mb-2">Current Filter:</h3> */}
+                <p className="text-indigo-400 font-bold mb-4 uppercase tracking-widest">
+                  {filterType}
+                </p>
+                {/* <p className="text-slate-400 text-sm mb-6">
+                  Showing  records.
+                </p> */}
                 <button
                   onClick={() => setFilterType("All")}
                   className="bg-white text-slate-900 px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-indigo-50 transition"
                 >
-                  Reset Filter
+                  Reset Dashboard
                 </button>
               </div>
               <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-600/20 rounded-full blur-3xl"></div>

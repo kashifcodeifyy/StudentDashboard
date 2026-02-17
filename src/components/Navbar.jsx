@@ -89,22 +89,13 @@ const Navbar = () => {
             <div className="h-6 w-[1px] bg-slate-200 mx-4"></div>
 
             <div className="flex items-center gap-4">
-              <button className="text-slate-400 hover:text-indigo-600 transition-colors">
-                <Bell size={20} />
-              </button>
-
               <div className="flex items-center gap-3 pl-2 border-l border-slate-100">
                 <div className="hidden lg:block text-right">
                   <p className="text-xs font-black text-slate-800 leading-none">
                     {user?.email?.split("@")[0]}
                   </p>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
-                    Admin Account
-                  </p>
                 </div>
-                <div className="bg-slate-100 p-2 rounded-full text-slate-600 border border-slate-200">
-                  <User size={18} />
-                </div>
+
                 <button
                   onClick={handleLogout}
                   className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
