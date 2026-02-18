@@ -6,13 +6,15 @@ import {
   deleteLead,
 } from "../controllers/leadController";
 
+import { validateBody, leadSchema } from "../validators/zodSchemas";
+
 const router: Router = express.Router();
 
 router.get("/", getLeads);
 
-router.post("/", addLead);
+router.post("/", validateBody(leadSchema), addLead);
 
-router.put("/:id", updateLead);
+router.put("/:id", validateBody(leadSchema.partial()), updateLead);
 
 router.delete("/:id", deleteLead);
 

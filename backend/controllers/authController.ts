@@ -3,7 +3,6 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User";
 
-// SIGNUP
 export const signup = async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
   try {
@@ -23,11 +22,10 @@ export const signup = async (req: Request, res: Response) => {
   }
 };
 
-// LOGIN
 export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   try {
-    const user: any = await User.findOne({ email }); // Temporary 'any' fix
+    const user: any = await User.findOne({ email });
     if (!user) return res.status(400).json({ error: "Invalid Credentials" });
 
     const isMatch = await bcrypt.compare(password, user.password);
